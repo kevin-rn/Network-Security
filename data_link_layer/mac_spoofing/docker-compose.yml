@@ -1,0 +1,32 @@
+version: "3.7"
+
+services:
+  attacker:
+    container_name: attacker
+    hostname: attacker
+    build: .
+    command: tail -F anything
+    cap_add:
+      - ALL
+    networks:
+      home_net:
+        ipv4_address: 192.168.124.10
+  defender:
+    container_name: defender
+    hostname: defender
+    cap_add:
+      - ALL
+    build:
+      context: .
+      dockerfile: Defenderfile
+    command: bash -c "iptables-restore < /etc/iptables/rules.v4 && tail -F anything"
+    networks:
+      home_net:
+        ipv4_address: 192.168.124.20
+
+networks:
+  home_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.124.0/24

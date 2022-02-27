@@ -61,3 +61,64 @@ if __name__ == '__main__':
     w = Watcher()
     w.run()
 ```
+
+```
+import re, time 
+from subprocess import Popen, PIPE, DEVNULL
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+
+DIR = "/var/www/html/joomla/administrator/logs/"
+FNAME = "error.php"
+
+# Watcher class for observing changes of file in directory
+class Watcher:
+    def __init__(self):
+        self.observer = Observer()
+
+    # Through unix command retrieve last line of the file and call print_log on it.
+    def loghandle(self):
+        process = Popen(['tail','-1',DIR+FNAME],shell=False, stderr=DEVNULL, stdout=PIPE)
+        res, _ = process.communicate()
+        authlog = str(res.decode())
+        print_log(authlog)
+
+    # Runs the observer continuously until keyboardinterrupt occurs (cntrl C).
+    def run(self):
+        event_handler =  FileModifiedHandler(self.loghandle) 
+        self.observer.schedule(event_handler, DIR, recursive=False)
+        self.observer.start()
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            self.observer.stop()
+            print("Stopped")
+        self.observer.join()
+
+# Handler class that detects the type of change that occurs.
+class FileModifiedHandler(FileSystemEventHandler):
+    def __init__(self, loghandle):
+        self.loghandle = loghandle
+
+    # Check if /var/log/auth.log changed
+    def on_modified(self, event): 
+        if not event.is_directory and event.src_path.endswith(FNAME):
+            self.loghandle() # call callback
+
+# Helper method for processing the results.
+def print_log(authlog):
+    #E.g. "Feb 20 23:21:13 virtual phpMyAdmin[2607]: user denied: admin (mysql-denied) from 127.0.0.1"
+    if "joomlafailure" in authlog:
+        split_str = authlog.split()
+        timestamp = split_str[0] # 2022-02-27T23:24:18+00:00
+        ip_address = split_str[2] # 127.0.0.1
+        print("Timestamp: {}, ip address: {}".format(timestamp, ip_address))
+    else:
+        print("No failed authentication found.")
+
+# main method
+if __name__ == '__main__':
+    w = Watcher()
+    w.run()
+```

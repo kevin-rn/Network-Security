@@ -62,7 +62,7 @@ if __name__ == '__main__':
     w.run()
 ```
 
-```
+```python
 import re, time 
 from subprocess import Popen, PIPE, DEVNULL
 from watchdog.observers import Observer
@@ -108,7 +108,7 @@ class FileModifiedHandler(FileSystemEventHandler):
 
 # Helper method for processing the results.
 def print_log(authlog):
-    #E.g. "Feb 20 23:21:13 virtual phpMyAdmin[2607]: user denied: admin (mysql-denied) from 127.0.0.1"
+    #E.g. 2018-05-25T22:10:26+00:00       INFO 127.0.0.1      joomlafailure   Username and password do not match or you do not have an account yet.
     if "joomlafailure" in authlog:
         split_str = authlog.split()
         timestamp = split_str[0] # 2022-02-27T23:24:18+00:00

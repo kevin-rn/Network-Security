@@ -122,3 +122,82 @@ if __name__ == '__main__':
     w = Watcher()
     w.run()
 ```
+
+import sys
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("ERROR")
+        exit()
+
+    input_str = str(sys.argv[1])
+    if len(input_str) > 50:
+        print("ERROR")
+        exit()
+
+    one_time_chars = ['B', 'H', 'Z', 'A', 'P', 'S', 'I', 'E', 'Z', 'S', 
+    'L', 'A', 'G', 'V', 'C', 'E', 'X', 'L', 'E', 'U', 'F', 'X', 'X', 'X', 
+    'G', 'O', 'F', 'J', 'L', 'D', 'H', 'S', 'O', 'S', 'C', 'O', 'Q', 'O', 
+    'J', 'G', 'X', 'W', 'W', 'P', 'R', 'Z', 'X', 'D', 'M', 'M']
+
+    bytes_str = input_str.encode()
+    otp = ""
+    for index, byte_txt in enumerate(bytes_str):
+        byte_key = ord(one_time_chars[index])
+        mod_add = (byte_key + ord(byte_txt)) % 2
+        otp += str(mod_add)
+    print(otp)
+
+
+from email.policy import default
+from nis import match
+
+from cupshelpers import Printer
+import numpy as np
+from scipy.optimize import curve_fit
+import sys
+
+def computeNumberOfStrings(n, lngth)
+
+
+def fitCurve(x, y):
+    def func(x, c, d):
+        return c * np.exp(d * x)
+
+    params, _ = curve_fit(func, x, y, p0=(1., 1.))
+
+    return params.tolist()
+
+def exactParams(n):
+    # compute/return the exact params c and d
+
+    return [c, d]
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3 or len(sys.argv) != 4:
+        print("ERROR")
+
+    func_name = str(sys.argv[1])
+    arg1 = sys.argv[2]
+    arg2 = sys.argv[3]
+
+    ## Match only available in python 3.10+
+    # match func_name:
+    #     case 'computeNumberOfStrings': 
+    #         computeNumberOfStrings(arg1, arg2)
+    #     case 'fitCurve': 
+    #         fitCurve(arg1, arg2)
+    #     case 'exactParams': 
+    #         exactParams(arg1)
+    #     default:
+    #         print("ERROR")
+
+    if func_name == 'computeNumberOfStrings':
+        computeNumberOfStrings(arg1, arg2)
+    elif func_name == 'fitCurve':
+        fitCurve(arg1, arg2)
+    elif func_name == 'exactParams':
+        exactParams(arg1)
+    else:
+        print("ERROR")

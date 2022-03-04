@@ -33,7 +33,7 @@ def elGamalDecrypt(n, a, c1, c2):
     K = pow(c1, a, n)
     t = (c2 * pow(K, -1, n)) % n
 
-    # Convert decimal format back to plain text
+    # Convert decimal format back to binary string format
     bin_message = format(t, 'b')
     # Do some padding if needed
     diff = 8 - (len(bin_message) % 8)

@@ -1,11 +1,9 @@
-def xor_str(text1, text2):
-    pairs = zip(text1, text2)
-    xor_pairs = [chr(ord(a) ^ ord(b)) for (a,b) in pairs]
-    return "".join(xor_pairs)
-
-def get_key():
-    # Ciphertexts
-    arr = [
+"""
+get_ciphers: Returns ciphertexts copied from otp_ciphertexts.txt
+"""
+def get_ciphers(paired = False):
+    # ciphers = [cipher.strip() for cipher in open("otp_ciphertexts.txt", 'r')]
+    ciphers = [
         "0ae2819b76206329213b2374186be281892c64263c22780d36207f74313d29733739203469", 
         "252d246d2b3f26692e35383970262b2d20763122723226372a75203c2a3f692220292221373c3174",
         "6323382963373d2723743524353264263c22782b3d613a3a6227253d23342c243a67243972292e347968",
@@ -28,17 +26,57 @@ def get_key():
         "630b7620362920692e35272e7023212d3d763b24332f343126752a3c36780f3c26352023312d63"
         ]
 
-    stored = []
-    for i in range(len(arr)-1):
-        for j in range(len(arr)):
-            # Pair everything that is not the same once and only use pairs of equal length.
-            if i < j and len(arr[i]) == len(arr[j]):
-                stored.append(xor_str(arr[i], arr[j]))
+    if paired:
+        same_length_pairs = []
+        for i in range(len(ciphers)-1):
+            for j in range(len(ciphers)):
+                if i < j and len(ciphers[i]) == len(ciphers[j]):
+                    same_length_pairs.append([ciphers[i], ciphers[j]])
+        return same_length_pairs
+    else:
+        return ciphers
+"""
+xor_str: Performs xor operation between two strings
+"""
+def xor_str(str1, str2):
+    xor_pairs = [chr(ord(a) ^ ord(b)) for a, b in zip(str1, str2)]
+    return "".join(xor_pairs)
 
+"""
+hex_str: Converts plain text string to hexadecimal format.
+"""
+def hex_str(str):
+    return str.encode("utf-8").hex()
 
-    # final_message = "222c326d2535213b662038263532643b3a2e78252161273c2b2738362136"
+"""
+crib_drag_start: Performs the crib dragging with an initial guess word to see other possible texts.
+"""
+def crib_drag_start():
+    initial = " cake "
+    pairs = get_ciphers(True)
+    for p in pairs:
+        for cipher in p:
+            for index in range(len(cipher)-len(hex_str(initial))):
+                key = xor_str(cipher[index:], initial)
+                for p2 in p:
+                    possible_text = xor_str(p2[index:], key)
+                    print("For cipher: {}, possible text: {}, key: {}".format(hex_str(cipher), possible_text, hex_str(key)))
+
+"""
+crib_drag: Performs crib dragging on all ciphertexts given a string.
+"""
+def crib_drag(str):
+    ciphers = get_ciphers()
+    for cipher in ciphers:
+        key = xor_str(cipher, str)
+        for cipher2 in ciphers:
+            if cipher != cipher2:
+                for index in range(len(ciphers)-len(hex_str(str))):
+                    possible_text = xor_str(cipher2[index:], key)
+                    print("For cipher: {}, possible text: {}, key: {}".format(hex_str(cipher), possible_text, hex_str(key)))
 
 if __name__ == "__main__":
+    # crib_drag_start()
     message = "222c326d2535213b662038263532643b3a2e78252161273c2b2738362136"
-    key = ""
-    print(xor_str(message, key))
+    key = crib_drag(" secret ")
+    # print(xor_str(message, key))

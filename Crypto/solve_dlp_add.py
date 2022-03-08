@@ -1,24 +1,16 @@
-from re import I, X
 import sys
 
 if __name__ == "__main__":
-    # Check if two arguments have been provided
-    if len(sys.argv) != 4:
-        print("ERROR")
-        exit()
-
-    h = sys.argv[1]
-    g = sys.argv[2]
-    n = sys.argv[3]
-
+    # try/except in case of missing arguments or incorrect format
     try:
-        h = int(h)
-        g = int(g)
-        n = int(n)
+        h = int(sys.argv[1])
+        g = int(sys.argv[2])
+        n = int(sys.argv[3])
 
-        dlp_add = (h * pow(g, -1, n)) % n
+        g_inv = pow(g, -1, n)
+        dlp_add = (h * g_inv) % n
         print(dlp_add)
 
-    except ValueError:
+    except:
         print("ERROR")
         exit()

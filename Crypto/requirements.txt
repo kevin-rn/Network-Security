@@ -1,2 +1,4 @@
+math
 numpy
 scipy
+re

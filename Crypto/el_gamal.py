@@ -31,7 +31,8 @@ Decryption following the ELGamal encryption algorithm.
 def elGamalDecrypt(n, a, c1, c2):
     # Perform calculation to retrieve plain text t
     K = pow(c1, a, n)
-    t = (c2 * pow(K, -1, n)) % n
+    K_inv = pow(K, -1, n)
+    t = (c2 * K_inv) % n
 
     # Convert decimal format back to binary string format
     bin_message = format(t, 'b')
@@ -48,9 +49,9 @@ def elGamalDecrypt(n, a, c1, c2):
 
 # Check input arguments and calls correct function.
 if __name__ == "__main__":
-    func_name = str(sys.argv[1])
-
+    # try/except in case of missing arguments or incorrect format
     try:
+        func_name = str(sys.argv[1])
         if func_name == 'elGamalEncrypt':
                 h = int(sys.argv[2])
                 g = int(sys.argv[3])
@@ -67,8 +68,10 @@ if __name__ == "__main__":
                 c2 = int(sys.argv[5])
                 message = elGamalDecrypt(n, a, c1, c2)
                 print(message)
+
         else:
             print("ERROR")
+
     # In case casting to int failed or incorrect number of arguments.
     except:
         print("ERROR")

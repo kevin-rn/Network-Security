@@ -26,10 +26,9 @@ def fitCurve(x, y):
 exactParams: compute/return the exact params c and d
 """
 def exactParams(n):
-    c = 1
     # c * b^x = c * e^(x ln b) so from fitCurve we see that d = ln b where b = n
+    c = 1
     d = np.log(n)
-
     return [c, d]
 
 

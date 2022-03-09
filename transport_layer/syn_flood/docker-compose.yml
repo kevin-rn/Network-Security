@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+  attacker:
+    container_name: attacker
+    hostname: attacker
+    build: .
+    command: tail -F anything
+    cap_add:
+      - ALL
+    networks:
+      home_net:
+        ipv4_address: 192.168.124.10
+  webserver:
+    container_name: webserver
+    hostname: webserver
+    cap_add:
+      - ALL
+    build:
+      context: .
+      dockerfile: Webservfile
+    sysctls:
+      - net.ipv4.tcp_syncookies=0
+      - net.ipv4.tcp_max_syn_backlog=80
+    networks:
+      home_net:
+        ipv4_address: 192.168.124.20
+
+networks:
+  home_net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.124.0/24

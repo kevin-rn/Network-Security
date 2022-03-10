@@ -2,6 +2,8 @@ import sys
 from scapy.all import *
 from random import randint
 
+# use 'sudo docker restart webserver' when rerunning this script as curl caches the website
+
 if __name__ == "__main__":
 	# Store arguments in variables
 	dest_addr = str(sys.argv[1])

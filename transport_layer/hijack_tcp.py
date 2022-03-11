@@ -3,7 +3,7 @@ from scapy.all import *
 from nclib import TCPServer
 
 def pkt_handler(pkt):
-        local_ip = get_if_addr("br-tcphijack)"
+        local_ip = get_if_addr("br-tcphijack")
         local_port = 5000
 
         if pkt[TCP].flags == "A":
@@ -24,4 +24,3 @@ if __name__ == "__main__":
 
         filter = "tcp and src host {} and dst host {}".format(src_addr, dst_addr)
         pkt = sniff(iface="br-tcphijack", filter=filter, prn=pkt_handler)
-

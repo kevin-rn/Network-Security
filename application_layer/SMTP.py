@@ -1,5 +1,7 @@
 import sys
-import smtplib
+from socket import socket, AF_INET, SOCK_STREAM
+import ssl
+import base64
 from email.message import EmailMessage
 
 if __name__ == "__main__":
@@ -18,14 +20,53 @@ if __name__ == "__main__":
 
     mail_text = "From: {}\nTo: {}\nSubject: New Email\nBody: {}\nAttachment: {}".format(sender_mail, receiver_mail, body, attachment)
 
-    try:
-        # server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.ehlo()
-        server.starttls()
-        server.login(sender_mail, sender_password)
-        server.send_message(msg)
-        server.close()
-        print(mail_text)
-    except:
-        pass
+    clientSocket = socket(AF_INET, SOCK_STREAM)
+    clientSocket.connect(('smtp.gmail.com', 587))
+    recv = clientSocket.recv(1024)
+    recv = recv.decode()
+    if recv[:3] != '220':
+        print('220 reply not received from server: ', recv)
+        quit()
+
+    clientSocket.send("EHLO Alice\r\n".encode())
+    recv = clientSocket.recv(1024)
+    recv = recv.decode()
+    if recv[:3] != '250':
+        print('250 reply on EHLO not received from server: ', recv)
+        quit()
+
+    clientSocket.send("STARTTLS\r\n".encode())
+    recv = clientSocket.recv(1024)
+    recv = recv.decode()
+    if recv[:3] != '220':
+        print('250 reply on STARTTLS not received from server: ', recv)
+        quit()
+
+    clientSocket.send("AUTH PLAIN\r\n".encode())
+    recv = clientSocket.recv(1024)
+    recv = recv.decode()
+    if recv[:3] != '250':
+        print('250 reply on AUTH PLAIN not received from server: ', recv)
+        quit()
+
+    authentication = base64.b64encode((sender_mail+"\0"+sender_password).encode())
+    clientSocket.send(authentication)
+    recv = clientSocket.recv(1024)
+    if recv[:3] != '250':
+        print('250 reply on authentication not received from server: ', recv)
+        quit()
+
+    clientSocket.send(msg.as_bytes())
+    recv = clientSocket.recv(1024)
+    if recv[:3] != '250':
+        print('250 reply on message not received from server: ', recv)
+        quit()
+
+    clientSocket.send("QUIT\r\n".encode())
+    recv = clientSocket.recv(1024)
+    if recv[:3] != '250':
+        print('250 reply on Quit not received from server: ', recv)
+        quit()
+    clientSocket.close()
+
+    print(mail_text)

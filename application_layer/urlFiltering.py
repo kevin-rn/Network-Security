@@ -6,9 +6,11 @@ if __name__ == "__main__":
     restrictions = str(sys.argv[1])
     websites = str(sys.argv[2])
 
+    # Split comma-separated text input
     restrict_list = restrictions.split(",")
     websites_list = websites.split(",")
 
+    # Loop for each url and check extension filetype
     for website in websites_list:
         _, filetype = splitext(urlparse(website).path)
         if filetype in restrict_list:

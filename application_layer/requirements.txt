@@ -3,3 +3,5 @@ urllib
 sklearn
 pandas
 email
+datetime
+socket

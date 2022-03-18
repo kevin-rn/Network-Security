@@ -32,43 +32,60 @@ def sendMail(sender: str, password: str, receiver: str, message: str):
     clientSocket.connect(('smtp.gmail.com', 587))
     response = clientSocket.recv(1024)
     response = response.decode()
+    print(response)
 
     ehlo = "ehlo localdomain" # {}\r\n".format(socket.getfqdn())
     clientSocket.send(format_send(ehlo))
     response = clientSocket.recv(1024)
     response = response.decode()
-
+    print(response)
+    
     clientSocket.send(format_send("STARTTLS"))
     response = clientSocket.recv(1024)
     response = response.decode()
-
+    print(response)
+    
     clientSocketTLS = ssl.wrap_socket(clientSocket, ssl_version=ssl.PROTOCOL_TLS)
     clientSocketTLS.send(format_send("AUTH LOGIN"))
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+    print(response)
+    
     clientSocketTLS.send(base64.b64encode(sender.encode()) + "\r\n".encode() )
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+    print(response)
+    
     clientSocketTLS.send(base64.b64encode(password.encode()) + "\r\n".encode())
     response = clientSocketTLS.recv(1024)
     response = response.decode()
+    print(response)
 
     clientSocketTLS.send(format_send("MAIL FROM:<" + sender + ">"))
     response = clientSocketTLS.recv(1024)
     response = response.decode()
+    print(response)
 
-    clientSocketTLS.send(format_send("RCPT TP:<" + receiver + ">"))
+    clientSocketTLS.send(format_send("RCPT TO:<" + receiver + ">"))
     response = clientSocketTLS.recv(1024)
     response = response.decode()
+    print(response)
 
     clientSocketTLS.send(format_send("DATA"))
     response = clientSocketTLS.recv(1024)
     response = response.decode()
+    print(response)
 
     clientSocketTLS.send(format_send(message))
     response = clientSocketTLS.recv(1024)
     response = response.decode()
-
+    print(response)
+    
     clientSocketTLS.send(format_send("QUIT"))
     response = clientSocketTLS.recv(1024)
     response = response.decode()
-
+    print(response)
+    
     clientSocketTLS.close()
     clientSocket.close()
 

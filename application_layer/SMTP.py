@@ -1,8 +1,76 @@
 import sys
-from socket import socket, AF_INET, SOCK_STREAM
 import ssl
+from os.path import basename
+from socket import socket, AF_INET, SOCK_STREAM
 import base64
-from email.message import EmailMessage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+
+def createMessage(sender: str, receiver: str, attachment: str, body: str):
+    message = MIMEMultipart()
+    message['From'] = sender
+    message['To'] = receiver
+    message['Subject'] = 'New Email'
+    message.attach(MIMEText(body, 'plain'))
+
+    with open(attachment, "rb") as attachment_fil:
+        filename = basename(attachment)                                             # extracts filename from the provided path
+        attachment_file = MIMEApplication(attachment_fil.read(), Name=filename)
+
+    attachment_file['Content-Disposition'] = 'attachment; filename="%s"' % filename
+    message.attach(attachment_file)
+    return message.as_string() + "\r\n.\r\n"
+
+def format_send(input_str: str):
+    result = input_str.encode() + "\r\n".encode()
+    return result
+
+def sendMail(sender: str, password: str, receiver: str, message: str):
+    clientSocket = socket(AF_INET, SOCK_STREAM)
+    
+    clientSocket.connect(('smtp.gmail.com', 587))
+    response = clientSocket.recv(1024)
+    response = response.decode()
+
+    ehlo = "ehlo localdomain" # {}\r\n".format(socket.getfqdn())
+    clientSocket.send(format_send(ehlo))
+    response = clientSocket.recv(1024)
+    response = response.decode()
+
+    clientSocket.send(format_send("STARTTLS"))
+    response = clientSocket.recv(1024)
+    response = response.decode()
+
+    clientSocketTLS = ssl.wrap_socket(clientSocket, ssl_version=ssl.PROTOCOL_TLS)
+    clientSocketTLS.send(format_send("AUTH LOGIN"))
+    clientSocketTLS.send(base64.b64encode(sender.encode()) + "\r\n".encode() )
+    clientSocketTLS.send(base64.b64encode(password.encode()) + "\r\n".encode())
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+
+    clientSocketTLS.send(format_send("MAIL FROM:<" + sender + ">"))
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+
+    clientSocketTLS.send(format_send("RCPT TP:<" + receiver + ">"))
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+
+    clientSocketTLS.send(format_send("DATA"))
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+
+    clientSocketTLS.send(format_send(message))
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+
+    clientSocketTLS.send(format_send("QUIT"))
+    response = clientSocketTLS.recv(1024)
+    response = response.decode()
+
+    clientSocketTLS.close()
+    clientSocket.close()
 
 if __name__ == "__main__":
     sender_mail = str(sys.argv[1])
@@ -11,62 +79,8 @@ if __name__ == "__main__":
     attachment = str(sys.argv[4])
     body = str(sys.argv[5])
 
-    msg = EmailMessage()
-    msg['From'] = sender_mail
-    msg['To'] = receiver_mail
-    msg['Subject'] = "New Email"
-    msg.set_content(body)
-    msg.add_attachment(attachment)
+    mail_text = "From: {}\r\nTo: {}\r\nSubject: New Email\r\nBody: {}\nAttachment: {}".format(sender_mail, receiver_mail, body, attachment)
+    message = createMessage(sender=sender_mail, receiver=receiver_mail, attachment=attachment, body=body)
 
-    mail_text = "From: {}\nTo: {}\nSubject: New Email\nBody: {}\nAttachment: {}".format(sender_mail, receiver_mail, body, attachment)
-
-    clientSocket = socket(AF_INET, SOCK_STREAM)
-    clientSocket.connect(('smtp.gmail.com', 587))
-    recv = clientSocket.recv(1024)
-    recv = recv.decode()
-    if recv[:3] != '220':
-        print('220 reply not received from server: ', recv)
-        quit()
-
-    clientSocket.send("EHLO Alice\r\n".encode())
-    recv = clientSocket.recv(1024)
-    recv = recv.decode()
-    if recv[:3] != '250':
-        print('250 reply on EHLO not received from server: ', recv)
-        quit()
-
-    clientSocket.send("STARTTLS\r\n".encode())
-    recv = clientSocket.recv(1024)
-    recv = recv.decode()
-    if recv[:3] != '220':
-        print('250 reply on STARTTLS not received from server: ', recv)
-        quit()
-
-    clientSocket.send("AUTH PLAIN\r\n".encode())
-    recv = clientSocket.recv(1024)
-    recv = recv.decode()
-    if recv[:3] != '250':
-        print('250 reply on AUTH PLAIN not received from server: ', recv)
-        quit()
-
-    authentication = base64.b64encode((sender_mail+"\0"+sender_password).encode())
-    clientSocket.send(authentication)
-    recv = clientSocket.recv(1024)
-    if recv[:3] != '250':
-        print('250 reply on authentication not received from server: ', recv)
-        quit()
-
-    clientSocket.send(msg.as_bytes())
-    recv = clientSocket.recv(1024)
-    if recv[:3] != '250':
-        print('250 reply on message not received from server: ', recv)
-        quit()
-
-    clientSocket.send("QUIT\r\n".encode())
-    recv = clientSocket.recv(1024)
-    if recv[:3] != '250':
-        print('250 reply on Quit not received from server: ', recv)
-        quit()
-    clientSocket.close()
-
+    sendMail(sender=sender_mail, password=sender_password, receiver=receiver_mail, message=message)
     print(mail_text)

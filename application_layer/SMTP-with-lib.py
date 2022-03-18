@@ -4,14 +4,8 @@ from email.message import EmailMessage
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from email.mime.audio import MIMEAudio
-from email.mime.image import MIMEImage
 from email.mime.base import MIMEBase
 from email import encoders
-import mimetypes
-import email
-
-# python3 SMTPold.py "ahmetvanderbergg@gmail.com" "Raditya-05" "ahmetvanderbergg@gmail.com" "test.txt" "Hello"
 
 if __name__ == "__main__":
     sender_mail = str(sys.argv[1])

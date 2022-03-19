@@ -45,7 +45,9 @@ def sendMail(sender: str, password: str, receiver: str, message: str):
     response = response.decode()
     print(response)
     
-    clientSocketTLS = ssl.wrap_socket(clientSocket, ssl_version=ssl.PROTOCOL_TLS)
+    context = ssl.create_default_context()
+    clientSocketTLS = context.wrap_socket(clientSocket, server_hostname='smtp.gmail.com')
+    # clientSocketTLS = ssl.wrap_socket(clientSocket, ssl_version=ssl.PROTOCOL_TLS)
     clientSocketTLS.send(format_send("AUTH LOGIN"))
     response = clientSocketTLS.recv(1024)
     response = response.decode()

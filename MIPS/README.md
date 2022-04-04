@@ -1,4 +1,7 @@
 # Network Security: Modular Intrusion Prevention System
+
+Note: copy of [mkhattat/network_security repository](https://github.com/mkhattat/network_security)
+
 This system is modular intrusion prevention system and consists of three main components separated into their own folder. 
 - The 'core' which handles and parses the log files, where failed authentication is stored, of each service that is used by the system. 
 - The 'server' which stores these parsed failed authentication in a database, a database observer that checks whether to ban or not and components that observe the database and then ban IP’s exceed the configured thresholds. 
@@ -65,3 +68,13 @@ npm run test:unit
 ```sh
 npm run lint
 ```
+
+
+# Team:
+
+- Ikenna Achinuhu
+- Jorrit van Assen
+- Kevin Nanhekhan
+- Mohamed Rashad
+- Mostafa Khattat
+- Duc Huy Nguyen
